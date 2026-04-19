@@ -6,18 +6,22 @@
     <title>雨与坠落的字</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
-    <header class="sky" aria-hidden="true">
-      <div class="cloud-rail">
+  <body tabindex="-1">
+    <header class="sky">
+      <div class="cloud-rail" id="cloudRail">
         <div class="cloud-pack" id="cloudPack">
           <div class="cloud">☁️</div>
-          <div class="rain"></div>
+        </div>
+        <div class="rain-column" id="rainColumn" aria-hidden="true">
+          <canvas id="rainCanvas" width="300" height="800"></canvas>
         </div>
       </div>
     </header>
 
     <main class="page">
-      <p class="hint">使用键盘 <kbd>←</kbd> <kbd>→</kbd> 移动云朵，雨带下方的字会像雨滴一样掉落。</p>
+      <p class="hint">
+        先<strong>点击页面</strong>获得焦点，再用 <kbd>←</kbd> <kbd>→</kbd> 或 <kbd>A</kbd> <kbd>D</kbd> 移动云朵；也可<strong>拖拽云朵区域</strong>。雨带下方的字会像雨滴一样掉落。
+      </p>
       <div class="poem" id="poem">
         <!-- 由 main.js 将段落拆为逐字 slot，便于脱落动画 -->
         <p>
@@ -36,6 +40,67 @@
     </main>
 
     <div id="fallLayer" class="fall-layer" aria-hidden="true"></div>
+
+    <button
+      type="button"
+      class="settings-trigger"
+      id="settingsTrigger"
+      aria-expanded="false"
+      aria-controls="settingsPanel"
+      title="设置"
+    >
+      设置
+    </button>
+    <div class="settings-scrim" id="settingsScrim" aria-hidden="true"></div>
+    <aside
+      class="settings-panel"
+      id="settingsPanel"
+      role="dialog"
+      aria-labelledby="settingsTitle"
+      aria-modal="true"
+      aria-hidden="true"
+    >
+      <div class="settings-panel__header">
+        <h2 class="settings-panel__title" id="settingsTitle">效果设置</h2>
+        <button type="button" class="settings-panel__close" id="settingsClose" aria-label="关闭">
+          ×
+        </button>
+      </div>
+      <div class="settings-panel__body">
+        <label class="settings-field" for="settingRainSpeed">
+          <span class="settings-field__label">雨与字下落速度（像素/秒）</span>
+          <span class="settings-field__value" id="settingRainSpeedVal">72</span>
+        </label>
+        <input
+          class="settings-range"
+          type="range"
+          id="settingRainSpeed"
+          min="18"
+          max="220"
+          step="1"
+          value="72"
+        />
+
+        <label class="settings-field" for="settingRainWidth">
+          <span class="settings-field__label">雨带宽度（像素）</span>
+          <span class="settings-field__value" id="settingRainWidthVal">64</span>
+        </label>
+        <input
+          class="settings-range"
+          type="range"
+          id="settingRainWidth"
+          min="24"
+          max="420"
+          step="1"
+          value="64"
+        />
+
+        <label class="settings-field settings-field--block" for="settingPoemText">
+          <span class="settings-field__label">正文（空行分段；修改后实时预览）</span>
+        </label>
+        <textarea class="settings-textarea" id="settingPoemText" rows="14" spellcheck="false"></textarea>
+      </div>
+    </aside>
 
     <script src="main.js" defer></script>
   </body>

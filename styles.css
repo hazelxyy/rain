@@ -11,8 +11,7 @@
 :root {
   --ink: #0a0a0a;
   --paper: #ffffff;
-  --rain-line: rgba(0, 0, 0, 0.18);
-  --fall-duration: 4.5s;
+  --fall-duration: 1.35s;
 }
 
 html {
@@ -33,6 +32,7 @@ body {
  */
 .sky {
   position: relative;
+  z-index: 5;
   padding: clamp(1rem, 3vh, 2rem) 0 0;
   user-select: none;
 }
@@ -40,7 +40,13 @@ body {
 .cloud-rail {
   position: relative;
   width: 100%;
-  min-height: clamp(5.5rem, 14vh, 8rem);
+  min-height: clamp(4.5rem, 12vh, 6.5rem);
+  touch-action: none;
+  cursor: grab;
+}
+
+.cloud-rail:active {
+  cursor: grabbing;
 }
 
 /**
@@ -64,36 +70,24 @@ body {
 }
 
 /**
- * 雨线：细竖线重复图案 + 轻微位移动画
+ * Canvas 雨幕：由 JS 定位，自云底延伸至视口底缘外（连续下落）
  */
-.rain {
-  width: min(140px, 38vw);
-  height: clamp(48px, 10vh, 88px);
-  margin-top: 0.15rem;
-  background: repeating-linear-gradient(
-    to right,
-    transparent 0,
-    transparent 10px,
-    var(--rain-line) 10px,
-    var(--rain-line) 11px
-  );
-  opacity: 0.85;
-  animation: rain-drift 2.8s linear infinite;
-  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.95), transparent);
+.rain-column {
+  position: fixed;
+  pointer-events: none;
+  z-index: 4;
+  overflow: hidden;
 }
 
-@keyframes rain-drift {
-  0% {
-    transform: translateY(-4px);
-    opacity: 0.75;
-  }
-  100% {
-    transform: translateY(6px);
-    opacity: 0.95;
-  }
+.rain-column canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .page {
+  position: relative;
+  z-index: 3;
   max-width: 52rem;
   margin: 0 auto;
   padding: clamp(0.75rem, 2vh, 1.5rem) clamp(1rem, 4vw, 2rem) clamp(3rem, 8vh, 5rem);
@@ -151,7 +145,7 @@ body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 5;
+  z-index: 6;
 }
 
 .falling {
@@ -159,7 +153,8 @@ body {
   margin: 0;
   will-change: transform, opacity;
   transform-origin: 50% 0;
-  animation: letter-fall var(--fall-duration) cubic-bezier(0.33, 0.02, 0.32, 1) forwards;
+  /** 与 Canvas 雨滴匀速下落一致（由 --fall-duration 控制合速度） */
+  animation: letter-fall var(--fall-duration, 8s) linear forwards;
 }
 
 @keyframes letter-fall {
@@ -177,8 +172,162 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rain {
-    animation: none;
+  .rain-column {
     opacity: 0.55;
   }
+}
+
+/**
+ * 右上角设置 + 右侧抽屉
+ */
+.settings-trigger {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 40;
+  padding: 0.4rem 0.75rem;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.settings-trigger:hover {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.settings-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 41;
+  background: rgba(0, 0, 0, 0.22);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+
+.settings-scrim.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.settings-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 42;
+  display: flex;
+  flex-direction: column;
+  width: min(100vw - 24px, 380px);
+  max-width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #fafafa;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: -6px 0 24px rgba(0, 0, 0, 0.08);
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.settings-panel.is-open {
+  transform: translateX(0);
+}
+
+.settings-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+}
+
+.settings-panel__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.settings-panel__close {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  font-size: 1.35rem;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.45);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.settings-panel__close:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--ink);
+}
+
+.settings-panel__body {
+  flex: 1;
+  overflow: auto;
+  padding: 1rem;
+}
+
+.settings-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  margin: 0 0 0.35rem;
+  font-size: 0.8rem;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.settings-field--block {
+  display: block;
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.settings-field__label {
+  flex: 1 1 12rem;
+}
+
+.settings-field__value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.settings-range {
+  width: 100%;
+  margin: 0 0 1rem;
+  accent-color: #333;
+}
+
+.settings-textarea {
+  display: block;
+  width: 100%;
+  min-height: 12rem;
+  margin: 0 0 0.5rem;
+  padding: 0.6rem 0.65rem;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  resize: vertical;
+}
+
+body.settings-open {
+  overflow: hidden;
 }
