@@ -1,0 +1,184 @@
+/**
+ * 参考：白底、顶栏云朵与雨线、等宽诗行、字母随机坠落留白
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --ink: #0a0a0a;
+  --paper: #ffffff;
+  --rain-line: rgba(0, 0, 0, 0.18);
+  --fall-duration: 4.5s;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Courier New", Courier, "Liberation Mono", monospace;
+  overflow-x: hidden;
+}
+
+/**
+ * 顶区：全宽轨道 + 可水平偏移的云与雨带
+ */
+.sky {
+  position: relative;
+  padding: clamp(1rem, 3vh, 2rem) 0 0;
+  user-select: none;
+}
+
+.cloud-rail {
+  position: relative;
+  width: 100%;
+  min-height: clamp(5.5rem, 14vh, 8rem);
+}
+
+/**
+ * 以视口中心为基准左右平移（由 --cloud-offset 控制，单位 px）
+ */
+.cloud-pack {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translate(calc(-50% + var(--cloud-offset, 0px)), 0);
+  will-change: transform;
+}
+
+.cloud {
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  line-height: 1;
+  filter: grayscale(0.15);
+}
+
+/**
+ * 雨线：细竖线重复图案 + 轻微位移动画
+ */
+.rain {
+  width: min(140px, 38vw);
+  height: clamp(48px, 10vh, 88px);
+  margin-top: 0.15rem;
+  background: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent 10px,
+    var(--rain-line) 10px,
+    var(--rain-line) 11px
+  );
+  opacity: 0.85;
+  animation: rain-drift 2.8s linear infinite;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.95), transparent);
+}
+
+@keyframes rain-drift {
+  0% {
+    transform: translateY(-4px);
+    opacity: 0.75;
+  }
+  100% {
+    transform: translateY(6px);
+    opacity: 0.95;
+  }
+}
+
+.page {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: clamp(0.75rem, 2vh, 1.5rem) clamp(1rem, 4vw, 2rem) clamp(3rem, 8vh, 5rem);
+}
+
+.hint {
+  margin: 0 0 1rem;
+  font-size: clamp(0.7rem, 1.5vw, 0.82rem);
+  color: rgba(0, 0, 0, 0.42);
+}
+
+.hint kbd {
+  padding: 0.1em 0.35em;
+  font-family: inherit;
+  font-size: 0.9em;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.poem {
+  font-size: clamp(0.8rem, 1.9vw, 0.95rem);
+  line-height: 1.65;
+  letter-spacing: 0.01em;
+  text-align: left;
+}
+
+.poem p {
+  margin: 0 0 1.15em;
+}
+
+/**
+ * 单字占位：脱落後仍保留字宽
+ */
+.slot {
+  display: inline-block;
+  min-width: 1ch;
+  text-align: center;
+  vertical-align: baseline;
+}
+
+.slot--empty .glyph {
+  visibility: hidden;
+}
+
+.glyph {
+  display: inline-block;
+  position: relative;
+}
+
+/**
+ * 坠落在最上层绘制（克隆节点使用）
+ */
+.fall-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.falling {
+  position: fixed;
+  margin: 0;
+  will-change: transform, opacity;
+  transform-origin: 50% 0;
+  animation: letter-fall var(--fall-duration) cubic-bezier(0.33, 0.02, 0.32, 1) forwards;
+}
+
+@keyframes letter-fall {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.92;
+  }
+  100% {
+    transform: translate(var(--drift-x, 0), var(--fall-dist, 120vh)) rotate(var(--spin, 6deg));
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rain {
+    animation: none;
+    opacity: 0.55;
+  }
+}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>雨与坠落的字</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="sky" aria-hidden="true">
+      <div class="cloud-rail">
+        <div class="cloud-pack" id="cloudPack">
+          <div class="cloud">☁️</div>
+          <div class="rain"></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <p class="hint">使用键盘 <kbd>←</kbd> <kbd>→</kbd> 移动云朵，雨带下方的字会像雨滴一样掉落。</p>
+      <div class="poem" id="poem">
+        <!-- 由 main.js 将段落拆为逐字 slot，便于脱落动画 -->
+        <p>
+          Rain writes thin vertical laws across the page, and every letter waits to see if it may stand. A narrow streak lands first, then another, and the sentence starts to loosen at the seam.
+        </p>
+        <p>
+          Wishing me like to one more rich in hope, Featured like him like him with friends possessed, Desiring this man's art and that man's scope, With what I most enjoy contented least;
+        </p>
+        <p>
+          Yet in these thoughts myself almost despising, Haply I think on thee, and then my state, Like to the lark at break of day arising From sullen earth, sings hymns at heaven's gate;
+        </p>
+        <p>
+          For thy sweet love remembered such wealth brings That then I scorn to change my state with kings.
+        </p>
+      </div>
+    </main>
+
+    <div id="fallLayer" class="fall-layer" aria-hidden="true"></div>
+
+    <script src="main.js" defer></script>
+  </body>
+</html>
